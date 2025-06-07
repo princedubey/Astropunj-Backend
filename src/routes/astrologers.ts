@@ -1,10 +1,10 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { AstrologerController } from "../controllers/astrologerController"
 import { validate, validateQuery } from "../middlewares/validation"
 import { authMiddleware } from "../middlewares/auth"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 // Validation schemas
 const onboardSchema = Joi.object({

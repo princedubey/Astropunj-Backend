@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express"
 import { NotificationService } from "../services/notificationService"
 import type { AuthenticatedRequest } from "../middlewares/auth"
-import { prisma } from "../prisma/client" // Declare the prisma variable
+import prisma from "../config/database"
 
 export class NotificationController {
   static async getNotifications(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -117,15 +117,13 @@ export class NotificationController {
         select: { pushTokens: true },
       })
 
-      const pushTokens = user?.pushTokens || []
-
-      // Remove existing token for this platform and add new one
-      const filteredTokens = pushTokens.filter((t: any) => t.platform !== platform)
-      filteredTokens.push({ token, platform, updatedAt: new Date() })
+      const pushTokens = (user?.pushTokens || []) as Array<{ token: string; platform: string; updatedAt: string }>
+      const filteredTokens = pushTokens.filter((t) => t.platform !== platform)
+      filteredTokens.push({ token, platform, updatedAt: new Date().toISOString() })
 
       await prisma.user.update({
         where: { id: userId },
-        data: { pushTokens: filteredTokens },
+        data: { pushTokens: filteredTokens as any },
       })
 
       res.json({

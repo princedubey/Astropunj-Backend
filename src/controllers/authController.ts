@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express"
 import prisma from "../config/database"
 import { supabaseAdmin } from "../config/supabase"
 import { createError } from "../middlewares/errorHandler"
+import type { AuthenticatedRequest } from "../middlewares/auth"
 
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction) {
@@ -48,7 +49,7 @@ export class AuthController {
     }
   }
 
-  static async getProfile(req: Request, res: Response, next: NextFunction) {
+  static async getProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.userId!
 
@@ -72,7 +73,7 @@ export class AuthController {
     }
   }
 
-  static async updateProfile(req: Request, res: Response, next: NextFunction) {
+  static async updateProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.userId!
       const { name, phone, language, birthInfo } = req.body

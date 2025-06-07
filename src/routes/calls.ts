@@ -1,11 +1,11 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { CallController } from "../controllers/callController"
 import { validate, validateQuery } from "../middlewares/validation"
 import { authMiddleware } from "../middlewares/auth"
 import { agoraTokenLimiter } from "../middlewares/rateLimiter"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 const initiateCallSchema = Joi.object({
   astrologerId: Joi.string().uuid().required(),

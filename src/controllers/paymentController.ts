@@ -77,8 +77,16 @@ export class PaymentController {
 
       // Update payment record and credit wallet
       await prisma.$transaction(async (tx) => {
+        const payment = await tx.payment.findFirst({
+          where: { razorpayOrderId: razorpay_order_id }
+        })
+
+        if (!payment) {
+          throw createError("Payment not found", 404)
+        }
+
         const paymentRecord = await tx.payment.update({
-          where: { razorpayOrderId: razorpay_order_id },
+          where: { id: payment.id },
           data: {
             razorpayPaymentId: razorpay_payment_id,
             status: "paid",

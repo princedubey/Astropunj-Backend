@@ -1,10 +1,10 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { NotificationController } from "../controllers/notificationController"
 import { authMiddleware, adminAuthMiddleware } from "../middlewares/auth"
 import { validate, validateQuery } from "../middlewares/validation"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 // Validation schemas
 const paginationSchema = Joi.object({

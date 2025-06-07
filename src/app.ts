@@ -1,30 +1,20 @@
-import express from "express"
+import express, { Application } from "express"
 import cors from "cors"
+import 'dotenv/config'
 import helmet from "helmet"
 import morgan from "morgan"
 import { errorHandler } from "./middlewares/errorHandler"
 import { generalLimiter } from "./middlewares/rateLimiter"
 import { UploadService } from "./services/uploadService"
+import routes from "./routes"
 
-// Import routes
-import authRoutes from "./routes/auth"
-import astrologerRoutes from "./routes/astrologers"
-import paymentRoutes from "./routes/payments"
-import walletRoutes from "./routes/wallet"
-import chatRoutes from "./routes/chat"
-import callRoutes from "./routes/calls"
-import adminRoutes from "./routes/admin"
-import reviewRoutes from "./routes/reviews"
-import notificationRoutes from "./routes/notifications"
-import uploadRoutes from "./routes/upload"
-
-const app = express()
+const app: Application = express()
 
 // Security middleware
 app.use(helmet())
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "*",
     credentials: true,
   }),
 )
@@ -52,16 +42,7 @@ app.get("/health", (req, res) => {
 })
 
 // API routes
-app.use("/api/auth", authRoutes)
-app.use("/api/astrologers", astrologerRoutes)
-app.use("/api/payments", paymentRoutes)
-app.use("/api/wallet", walletRoutes)
-app.use("/api/chat", chatRoutes)
-app.use("/api/calls", callRoutes)
-app.use("/api/admin", adminRoutes)
-app.use("/api/reviews", reviewRoutes)
-app.use("/api/notifications", notificationRoutes)
-app.use("/api/upload", uploadRoutes)
+app.use("/api", routes)
 
 // 404 handler
 app.use("*", (req, res) => {

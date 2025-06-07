@@ -1,11 +1,11 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { AdminController } from "../controllers/adminController"
 import { adminAuthMiddleware } from "../middlewares/auth"
 import { validate, validateQuery } from "../middlewares/validation"
 import { authLimiter } from "../middlewares/rateLimiter"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 // Validation schemas
 const loginSchema = Joi.object({

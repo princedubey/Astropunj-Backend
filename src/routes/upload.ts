@@ -1,10 +1,10 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { UploadController } from "../controllers/uploadController"
 import { authMiddleware } from "../middlewares/auth"
 import { validate } from "../middlewares/validation"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 // Validation schemas
 const generateUploadUrlSchema = Joi.object({

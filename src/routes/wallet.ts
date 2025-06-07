@@ -1,10 +1,10 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { WalletController } from "../controllers/walletController"
 import { authMiddleware, adminAuthMiddleware } from "../middlewares/auth"
 import { validate, validateQuery } from "../middlewares/validation"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 const paginationSchema = Joi.object({
   page: Joi.number().min(1).default(1),

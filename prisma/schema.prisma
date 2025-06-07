@@ -10,6 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("super-admin") // super-admin | support
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("admins")
+}
 model User {
   id              String   @id @default(uuid())
   email           String   @unique
@@ -155,7 +166,7 @@ model Notification {
   title     String
   message   String
   type      String   // chat | call | payment | review | system | promotion
-  data      Json     @default({})
+  data      Json     @default(dbgenerated("'{}'::jsonb"))
   imageUrl  String?
   isRead    Boolean  @default(false)
   readAt    DateTime?
@@ -195,16 +206,4 @@ model Kundali {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("kundalis")
-}
-
-model Admin {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      String   @default("support") // super-admin | support
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("admins")
 }

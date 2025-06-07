@@ -1,10 +1,10 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { ReviewController } from "../controllers/reviewController"
 import { authMiddleware, adminAuthMiddleware } from "../middlewares/auth"
 import { validate, validateQuery } from "../middlewares/validation"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 const createReviewSchema = Joi.object({
   astrologerId: Joi.string().uuid().required(),

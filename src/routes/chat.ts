@@ -1,10 +1,10 @@
-import { Router } from "express"
+import { Router, type IRouter } from "express"
 import { ChatController } from "../controllers/chatController"
 import { validate, validateQuery } from "../middlewares/validation"
 import { authMiddleware } from "../middlewares/auth"
 import Joi from "joi"
 
-const router = Router()
+const router: IRouter = Router()
 
 const startChatSchema = Joi.object({
   astrologerId: Joi.string().uuid().required(),

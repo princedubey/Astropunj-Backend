@@ -20,6 +20,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "dotenv": "^16.5.0",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
@@ -39,7 +40,15 @@
     "tsx": "^4.6.2",
     "typescript": "^5.3.3"
   },
-  "keywords": ["astrology", "backend", "api", "nodejs", "express", "prisma", "supabase"],
+  "keywords": [
+    "astrology",
+    "backend",
+    "api",
+    "nodejs",
+    "express",
+    "prisma",
+    "supabase"
+  ],
   "author": "AstroPunj Team",
   "license": "MIT"
 }
