@@ -55,11 +55,13 @@ app.use("*", (req, res) => {
 // Error handling middleware
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 5000
-
-app.listen(PORT, () => {
-  console.log(`🚀 AstroPunj Backend running on port ${PORT}`)
-  console.log(`📊 Health check: http://localhost:${PORT}/health`)
-})
+// Only start the server if not running on Vercel
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000
+  app.listen(PORT, () => {
+    console.log(`🚀 AstroPunj Backend running on port ${PORT}`)
+    console.log(`📊 Health check: http://localhost:${PORT}/health`)
+  })
+}
 
 export default app

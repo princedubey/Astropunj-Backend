@@ -138,6 +138,25 @@ pnpm test:coverage
 
 ## 📦 Deployment
 
+### Vercel Deployment (Temporary)
+
+1. **Install Vercel CLI**
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy to Vercel**
+   ```bash
+   vercel
+   ```
+
+3. **For Production Deployment**
+   ```bash
+   vercel --prod
+   ```
+
+### Server Deployment
+
 1. **Build the project**
    ```bash
    pnpm build
@@ -147,6 +166,28 @@ pnpm test:coverage
    ```bash
    pnpm start
    ```
+
+### Environment Variables
+
+Make sure to set up the following environment variables in your deployment platform:
+
+```env
+# Required for both Vercel and Server
+DATABASE_URL=your_database_url
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+AGORA_APP_ID=your_agora_app_id
+AGORA_APP_CERTIFICATE=your_agora_app_certificate
+JWT_SECRET=your_jwt_secret
+FRONTEND_URL=your_frontend_url
+
+# Optional
+PORT=5000
+NODE_ENV=production
+```
 
 ## 🔐 Security
 
@@ -183,3 +224,57 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Supabase](https://supabase.io/)
 - [Razorpay](https://razorpay.com/)
 - [Agora](https://www.agora.io/)
+
+## 🗄️ Database Management
+
+### Development
+
+1. **Generate Prisma Client**
+   ```bash
+   pnpm db:generate
+   ```
+
+2. **Create a new migration**
+   ```bash
+   pnpm db:migrate
+   ```
+
+3. **Apply pending migrations**
+   ```bash
+   pnpm db:push
+   ```
+
+4. **Reset database (if needed)**
+   ```bash
+   pnpm db:reset
+   ```
+
+### Production
+
+1. **Apply migrations safely**
+   ```bash
+   pnpm db:migrate:deploy
+   ```
+
+2. **View database with Prisma Studio**
+   ```bash
+   pnpm db:studio
+   ```
+
+### Migration Best Practices
+
+1. **Always create migrations in development**
+   - Use `pnpm db:migrate` to create migration files
+   - Test migrations locally before deploying
+   - Commit migration files to version control
+
+2. **Production deployment**
+   - Never use `db:migrate` in production
+   - Always use `db:migrate:deploy` for production
+   - Back up database before migrations
+   - Schedule migrations during low-traffic periods
+
+3. **Rollback strategy**
+   - Keep track of migration history
+   - Test rollback procedures
+   - Maintain database backups
