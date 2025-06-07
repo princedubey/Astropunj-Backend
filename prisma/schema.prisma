@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  phone           String?  @unique
+  name            String
+  dob             DateTime
+  gender          String
+  language        String
+  birthInfo       Json
+  walletBalance   Int      @default(0)
+  isBlocked       Boolean  @default(false)
+  profileImage    String?
+  pushTokens      Json[]   @default([])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  astrologer      Astrologer?
+  chats           Chat[]
+  calls           Call[]
+  walletTxns      WalletTransaction[]
+  payments        Payment[]
+  reviews         Review[]
+  notifications   Notification[]
+  notificationSettings NotificationSettings?
+  kundalis        Kundali[]
+  
+  @@map("users")
+}
+
+model Astrologer {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  bio               String
+  experience        Int
+  expertise         String[]
+  languages         String[]
+  pricePerMinuteChat Int
+  pricePerMinuteCall Int
+  available         Boolean  @default(false)
+  rating            Float    @default(0)
+  totalReviews      Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chats             Chat[]
+  calls             Call[]
+  reviews           Review[]
+  
+  @@map("astrologers")
+}
+
+model Chat {
+  id           String   @id @default(uuid())
+  userId       String
+  astrologerId String
+  messages     Json[]
+  startedAt    DateTime
+  endedAt      DateTime?
+  duration     Int      @default(0)
+  chargedAmount Int     @default(0)
+  status       String   @default("active") // active | completed | cancelled
+  createdAt    DateTime @default(now())
+  
+  user         User      @relation(fields: [userId], references: [id])
+  astrologer   Astrologer @relation(fields: [astrologerId], references: [id])
+  
+  @@map("chats")
+}
+
+model Call {
+  id           String   @id @default(uuid())
+  userId       String
+  astrologerId String
+  type         String   // voice | video
+  startTime    DateTime
+  endTime      DateTime?
+  duration     Int      @default(0)
+  chargedAmount Int     @default(0)
+  agoraChannel String
+  agoraToken   String?
+  status       String   @default("initiated") // initiated | ongoing | completed | missed | cancelled
+  createdAt    DateTime @default(now())
+  
+  user         User      @relation(fields: [userId], references: [id])
+  astrologer   Astrologer @relation(fields: [astrologerId], references: [id])
+  
+  @@map("calls")
+}
+
+model WalletTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // credit | debit
+  source    String   // razorpay | refund | call | chat | admin
+  amount    Int
+  remarks   String
+  balanceAfter Int
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+  
+  @@map("wallet_transactions")
+}
+
+model Payment {
+  id               String   @id @default(uuid())
+  userId           String
+  razorpayPaymentId String?
+  razorpayOrderId  String?
+  amount           Int
+  currency         String   @default("INR")
+  status           String   // created | paid | failed | refunded
+  receipt          String
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id])
+  
+  @@map("payments")
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  userId       String
+  astrologerId String
+  rating       Int
+  review       String
+  serviceType  String   // chat | call
+  serviceId    String   // chat_id or call_id
+  createdAt    DateTime @default(now())
+  
+  user         User      @relation(fields: [userId], references: [id])
+  astrologer   Astrologer @relation(fields: [astrologerId], references: [id])
+  
+  @@map("reviews")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // chat | call | payment | review | system | promotion
+  data      Json     @default({})
+  imageUrl  String?
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+}
+
+model NotificationSettings {
+  id                     String  @id @default(uuid())
+  userId                 String  @unique
+  pushEnabled            Boolean @default(true)
+  emailEnabled           Boolean @default(true)
+  chatNotifications      Boolean @default(true)
+  callNotifications      Boolean @default(true)
+  paymentNotifications   Boolean @default(true)
+  promotionalNotifications Boolean @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  user                   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notification_settings")
+}
+
+model Kundali {
+  id        String   @id @default(uuid())
+  userId    String
+  fileName  String
+  filePath  String
+  bucket    String
+  fileType  String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("kundalis")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("support") // super-admin | support
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("admins")
+}
