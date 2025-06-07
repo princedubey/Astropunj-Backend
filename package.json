@@ -34,6 +34,7 @@
     "razorpay": "^2.9.2"
   },
   "devDependencies": {
+    "@supabase/storage-js": "^2.7.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",

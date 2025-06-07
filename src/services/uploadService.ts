@@ -1,6 +1,17 @@
 import { supabaseAdmin } from "../config/supabase"
 import { createError } from "../middlewares/errorHandler"
 import crypto from "crypto"
+import prisma from "../config/database"
+import type { FileObject } from "@supabase/storage-js"
+
+interface StorageFile {
+  name: string
+  id: string
+  updated_at: string
+  created_at: string
+  last_accessed_at: string
+  metadata: Record<string, any>
+}
 
 export interface UploadConfig {
   bucket: string
@@ -137,7 +148,7 @@ export class UploadService {
     }
   }
 
-  static async getFileInfo(bucket: string, filePath: string) {
+  static async getFileInfo(bucket: string, filePath: string): Promise<StorageFile | null> {
     try {
       const { data, error } = await supabaseAdmin.storage
         .from(bucket)
@@ -156,10 +167,9 @@ export class UploadService {
     }
   }
 
-  static async listUserFiles(bucket: string, userId: string, folder?: string) {
+  static async listUserFiles(bucket: string, userId: string, folder?: string): Promise<StorageFile[]> {
     try {
-      const path = folder ? `${folder}/${userId}` : userId
-
+      const path = folder ? `${userId}/${folder}` : userId
       const { data, error } = await supabaseAdmin.storage.from(bucket).list(path)
 
       if (error) {
@@ -196,5 +206,66 @@ export class UploadService {
     const { data } = supabaseAdmin.storage.from(bucket).getPublicUrl(filePath)
 
     return data.publicUrl
+  }
+
+  static async updateProfileImage(userId: string, filePath: string, bucket: string) {
+    try {
+      // Generate public URL or signed URL for the profile image
+      const imageUrl = await this.generateSignedDownloadUrl(bucket, filePath, 365 * 24 * 3600) // 1 year
+
+      // Update user profile with new image URL
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: { profileImage: imageUrl },
+      })
+
+      return user
+    } catch (error) {
+      console.error("Error updating profile image:", error)
+      throw error
+    }
+  }
+
+  static async uploadKundali(userId: string, filePath: string, bucket: string, fileName: string, fileType: string) {
+    try {
+      // Save kundali information to database
+      const kundali = await prisma.kundali.create({
+        data: {
+          userId,
+          fileName,
+          filePath,
+          bucket,
+          fileType,
+        },
+      })
+
+      return kundali
+    } catch (error) {
+      console.error("Error uploading kundali:", error)
+      throw error
+    }
+  }
+
+  static async deleteKundali(kundaliId: string, userId: string) {
+    try {
+      const kundali = await prisma.kundali.findFirst({
+        where: { id: kundaliId, userId },
+      })
+
+      if (!kundali) {
+        throw createError("Kundali not found", 404)
+      }
+
+      // Delete file from storage
+      await this.deleteFile(kundali.bucket, kundali.filePath)
+
+      // Delete record from database
+      await prisma.kundali.delete({
+        where: { id: kundaliId },
+      })
+    } catch (error) {
+      console.error("Error deleting kundali:", error)
+      throw error
+    }
   }
 }

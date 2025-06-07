@@ -37,25 +37,11 @@ export class UploadController {
     }
   }
 
-  static async deleteFile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  static async deleteFile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.userId!
       const { bucket, filePath } = req.params
-
-      // Verify user owns the file (check if filePath contains userId)
-      if (!filePath.includes(userId)) {
-        return res.status(403).json({
-          success: false,
-          error: "Unauthorized to delete this file",
-        })
-      }
-
       await UploadService.deleteFile(bucket, filePath)
-
-      res.json({
-        success: true,
-        message: "File deleted successfully",
-      })
+      res.json({ success: true, message: "File deleted successfully" })
     } catch (error) {
       next(error)
     }
@@ -78,67 +64,23 @@ export class UploadController {
     }
   }
 
-  static async updateProfileImage(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  static async updateProfileImage(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.userId!
       const { filePath, bucket } = req.body
-
-      // Verify the file belongs to the user
-      if (!filePath.includes(userId)) {
-        return res.status(403).json({
-          success: false,
-          error: "Unauthorized file access",
-        })
-      }
-
-      // Generate public URL or signed URL for the profile image
-      const imageUrl = await UploadService.generateSignedDownloadUrl(bucket, filePath, 365 * 24 * 3600) // 1 year
-
-      // Update user profile with new image URL
-      await prisma.user.update({
-        where: { id: userId },
-        data: { profileImage: imageUrl },
-      })
-
-      res.json({
-        success: true,
-        data: { imageUrl },
-        message: "Profile image updated successfully",
-      })
+      const user = await UploadService.updateProfileImage(userId, filePath, bucket)
+      res.json({ success: true, data: { user } })
     } catch (error) {
       next(error)
     }
   }
 
-  static async uploadKundali(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  static async uploadKundali(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.userId!
       const { filePath, bucket, fileName, fileType } = req.body
-
-      // Verify the file belongs to the user
-      if (!filePath.includes(userId)) {
-        return res.status(403).json({
-          success: false,
-          error: "Unauthorized file access",
-        })
-      }
-
-      // Save kundali information to database
-      const kundali = await prisma.kundali.create({
-        data: {
-          userId,
-          fileName,
-          filePath,
-          bucket,
-          fileType,
-        },
-      })
-
-      res.json({
-        success: true,
-        data: { kundali },
-        message: "Kundali uploaded successfully",
-      })
+      const kundali = await UploadService.uploadKundali(userId, filePath, bucket, fileName, fileType)
+      res.json({ success: true, data: { kundali } })
     } catch (error) {
       next(error)
     }
@@ -173,34 +115,12 @@ export class UploadController {
     }
   }
 
-  static async deleteKundali(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  static async deleteKundali(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.userId!
       const { kundaliId } = req.params
-
-      const kundali = await prisma.kundali.findFirst({
-        where: { id: kundaliId, userId },
-      })
-
-      if (!kundali) {
-        return res.status(404).json({
-          success: false,
-          error: "Kundali not found",
-        })
-      }
-
-      // Delete file from storage
-      await UploadService.deleteFile(kundali.bucket, kundali.filePath)
-
-      // Delete record from database
-      await prisma.kundali.delete({
-        where: { id: kundaliId },
-      })
-
-      res.json({
-        success: true,
-        message: "Kundali deleted successfully",
-      })
+      await UploadService.deleteKundali(kundaliId, userId)
+      res.json({ success: true, message: "Kundali deleted successfully" })
     } catch (error) {
       next(error)
     }
