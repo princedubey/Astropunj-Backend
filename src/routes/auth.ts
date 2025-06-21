@@ -10,20 +10,19 @@ const router: IRouter = Router()
 // Validation schemas
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
-  name: Joi.string().min(2).max(50).required(),
-  phone: Joi.string()
-    .pattern(/^[6-9]\d{9}$/)
-    .optional(),
-  dob: Joi.date().max("now").required(),
-  gender: Joi.string().valid("male", "female", "other").required(),
+  password: Joi.string().min(6).required(),
+  name: Joi.string().required(),
+  phone: Joi.string().optional(),
+  dob: Joi.date().required(),
+  gender: Joi.string().required(),
   language: Joi.string().required(),
   birthInfo: Joi.object({
+    date: Joi.string().required(),
     time: Joi.string().required(),
     place: Joi.string().required(),
-    coordinates: Joi.object({
-      lat: Joi.number().required(),
-      lng: Joi.number().required(),
-    }).required(),
+    latitude: Joi.number().required(),
+    longitude: Joi.number().required(),
+    timezone: Joi.string().required(),
   }).required(),
 })
 
@@ -56,8 +55,28 @@ const updateProfileSchema = Joi.object({
   }).optional(),
 })
 
+const loginSchema = Joi.object({
+  email: Joi.string().email().when('phone', {
+    is: Joi.exist(),
+    then: Joi.optional(),
+    otherwise: Joi.required(),
+  }),
+  phone: Joi.string().when('email', {
+    is: Joi.exist(),
+    then: Joi.optional(),
+    otherwise: Joi.required(),
+  }),
+  password: Joi.string().required(),
+}).xor('email', 'phone')
+
+const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required(),
+})
+
 // Routes
 router.post("/register", authLimiter, validate(registerSchema), AuthController.register)
+router.post("/login", authLimiter, validate(loginSchema), AuthController.login)
+router.post("/refresh-token", authLimiter, validate(refreshTokenSchema), AuthController.refreshToken)
 router.post("/send-otp", authLimiter, validate(otpSchema), AuthController.sendOTP)
 router.post("/verify-otp", authLimiter, validate(verifyOtpSchema), AuthController.verifyOTP)
 router.get("/profile", authMiddleware, AuthController.getProfile)

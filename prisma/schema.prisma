@@ -25,11 +25,13 @@ model User {
   id              String   @id @default(uuid())
   email           String   @unique
   phone           String?  @unique
-  name            String
-  dob             DateTime
-  gender          String
-  language        String
-  birthInfo       Json
+  name            String   @default("Give me your name")
+  role            String   @default("user")
+  password        String
+  dob             DateTime?
+  gender          String?
+  language        String?
+  birthInfo       Json?
   walletBalance   Int      @default(0)
   isBlocked       Boolean  @default(false)
   profileImage    String?
